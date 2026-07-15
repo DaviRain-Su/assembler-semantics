@@ -10,6 +10,12 @@ for PQR ops not yet in `crates/common/src/execute/*`.
 ## Lean side
 
 Golden vectors live in `SbpfSemantics/DiffTests.lean` (`native_decide`).
+Machine-readable copy: `tools/diff_oracle/vectors.json`.
+
+```bash
+python3 tools/diff_oracle/check_vectors.py
+lake build
+```
 
 ## Rust side (manual / future CI)
 

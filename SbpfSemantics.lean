@@ -4,8 +4,10 @@ import SbpfSemantics.Opcode
 import SbpfSemantics.Instr
 import SbpfSemantics.Encode
 import SbpfSemantics.EncodeLemmas
+import SbpfSemantics.EncodeSem
 import SbpfSemantics.Machine
 import SbpfSemantics.Dialect
+import SbpfSemantics.Host
 import SbpfSemantics.Alu
 import SbpfSemantics.Step
 import SbpfSemantics.Run

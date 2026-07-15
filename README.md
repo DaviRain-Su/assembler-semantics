@@ -35,16 +35,17 @@ No Mathlib dependency for the core skeleton (faster cold builds).
 |--------|------|
 | `Opcode` | Opcode enum, V3 byte maps, op classes |
 | `Instr` | Resolved instruction AST + program |
-| `Encode` / `EncodeLemmas` | encode/decode + V3 round-trip facts |
+| `Encode` / `EncodeLemmas` / `EncodeSem` | encode/decode + V3 facts + semantic preservation goldens |
 | `Machine` | Registers, PC, memory, call stack |
 | `Alu` | Classic ALU + SIMD-0174 PQR |
-| `Dialect` | Syscall relation (`closed` / `noop` / `stub`) |
+| `Dialect` / `Host` | Syscall hosts (`closed` / `noop` / `stub` / `host`) |
 | `Step` | Single-step exec + relational `Step` |
 | `Run` / `Interp` | Fuel multi-step runner |
 | `Determinism` / `Adequacy` | Meta-theory (core lemmas) |
 | `Examples` / `DiffTests` | `native_decide` goldens vs sbpf traces |
 
-See also [`docs/diff-oracle.md`](./docs/diff-oracle.md).
+See also [`docs/diff-oracle.md`](./docs/diff-oracle.md) and
+[`tools/diff_oracle/`](./tools/diff_oracle/).
 
 ## What reuses sbpf vs what is rewritten in Lean
 

@@ -1,5 +1,6 @@
 import SbpfSemantics.Interp
 import SbpfSemantics.Alu
+import SbpfSemantics.Host
 
 /-!
 # SbpfSemantics.DiffTests
@@ -96,9 +97,27 @@ example : (interpEntry stubExec progLog 10).2 = .halted 0#64 := by native_decide
 /-- Closed dialect sticks on syscall. -/
 example : (interpEntry closedExec progLog 10).2 = .stuck := by native_decide
 
-/-- abort is stuck even under stubExec. -/
+/-- abort is stuck under stubExec (no halt). -/
 def progAbort : Program := #[.callSyscall "abort", .exit]
 
 example : (interpEntry stubExec progAbort 5).2 = .stuck := by native_decide
+
+/-- abort under hostExec halts the machine. -/
+example : (interpEntry hostExec progAbort 5).2 = .halted 1#64 := by native_decide
+
+/-- memset via host: write 4 bytes of 0xab at FP-8, load back low byte. -/
+def progMemset : Program :=
+  #[
+    -- r1 = dst = r10 - 8, r2 = c = 0xab, r3 = n = 4
+    .binReg .Mov64Reg r1 ⟨10, by omega⟩,
+    .binImm .Add64Imm r1 (BitVec.ofInt 64 (-8)),
+    .binImm .Mov64Imm r2 0xab#64,
+    .binImm .Mov64Imm ⟨3, by omega⟩ 4#64,
+    .callSyscall "sol_memset_",
+    .loadMem .Ldxb r0 ⟨10, by omega⟩ (BitVec.ofInt 16 (-8)),
+    .exit
+  ]
+
+example : (interpEntry hostExec progMemset 40).2 = .halted 0xab#64 := by native_decide
 
 end SbpfSemantics.DiffTests

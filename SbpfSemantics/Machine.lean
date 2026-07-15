@@ -115,6 +115,33 @@ def writeU64 (m : Memory) (addr : Word) (v : Word) : Option Memory := do
   let m ← m.writeU32 addr v
   m.writeU32 (addr + 4#64) (v >>> 32)
 
+/-- Read `n` consecutive bytes starting at `addr`. -/
+def readBytes (m : Memory) (addr : Word) (n : Nat) : Option (Array UInt8) :=
+  let rec go (i : Nat) (acc : Array UInt8) : Option (Array UInt8) :=
+    if i ≥ n then some acc
+    else do
+      let b ← m.getByte (addr + BitVec.ofNat 64 i)
+      go (i + 1) (acc.push b)
+  go 0 #[]
+
+/-- Write bytes starting at `addr` (fails on OOB / rodata). -/
+def writeBytes (m : Memory) (addr : Word) (bs : Array UInt8) : Option Memory :=
+  let rec go (i : Nat) (m : Memory) : Option Memory :=
+    if h : i < bs.size then do
+      let m ← m.setByte (addr + BitVec.ofNat 64 i) bs[i]
+      go (i + 1) m
+    else some m
+  go 0 m
+
+/-- Fill `n` bytes at `addr` with `c`. -/
+def memset (m : Memory) (addr : Word) (c : UInt8) (n : Nat) : Option Memory :=
+  m.writeBytes addr (Array.replicate n c)
+
+/-- Non-overlapping check used by `sol_memcpy_`. -/
+def nonoverlapping (src srcLen dst dstLen : Nat) : Bool :=
+  if src > dst then src - dst ≥ dstLen
+  else dst - src ≥ srcLen
+
 end Memory
 
 /-- Full machine state. -/

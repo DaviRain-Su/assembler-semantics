@@ -141,10 +141,14 @@ def execCallRel (m : Machine) (off : Word) : Option Machine := do
   let target := (m.pc : Int) + 1 + off.toInt
   pure (m.setPc target.toNat)
 
-/-- Host syscall via dialect; return value written to `r0`. -/
+/-- Host syscall via dialect; return value written to `r0`.
+
+If the host already halted the machine (`abort` / `sol_panic_`), do not
+advance PC — the run ends at the syscall. -/
 def execSyscall (D : ExecDialect) (m : Machine) (name : String) : Option Machine := do
   let (m', r) ← D.syscallFn name m
-  some ((m'.setReg ⟨0, by omega⟩ r).advancePc)
+  let m' := m'.setReg ⟨0, by omega⟩ r
+  if m'.halted.isSome then pure m' else pure m'.advancePc
 
 def execCallx (m : Machine) (r : Reg) : Option Machine := do
   if r.val ≥ 10 then none

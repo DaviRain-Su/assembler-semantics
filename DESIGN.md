@@ -121,8 +121,10 @@ Lean, compare runs against `SbpfVm`.
 | Determinism (closed step) | done |
 | Fuel interpreter + adequacy skeleton | done |
 | Syscall dialect (`closed`/`noop`/`stub`) | done |
-| Diff goldens (`DiffTests`) | done |
-| Full encode semantic preservation | Phase 2 |
+| Diff goldens (`DiffTests` + `tools/diff_oracle`) | done |
+| Encode semantic preservation (concrete programs) | done (`EncodeSem`) |
+| Host memory syscalls + abort halt | done (`Host`) |
+| General encode ∀-preservation proof | later |
 | Label resolution / ELF packing | later |
 
 ## Reference map (sbpf → Lean)
