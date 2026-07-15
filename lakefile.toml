@@ -1,0 +1,14 @@
+name = "assembler-semantics"
+version = "0.1.0"
+defaultTargets = ["SbpfSemantics"]
+
+[leanOptions]
+# Prefer explicit proofs; allow `sorry` only while scaffolding meta-theory.
+warningAsError = false
+
+[[lean_lib]]
+name = "SbpfSemantics"
+
+[[lean_exe]]
+name = "assembler-semantics"
+root = "Main"
