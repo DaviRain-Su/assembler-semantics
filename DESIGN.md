@@ -131,7 +131,9 @@ Lean, compare runs against `SbpfVm`.
 | **Phase 1 delivery** | **complete** |
 | WellFormed + encodable (V3-safe, imm fits) | done |
 | EncodePreserve: sameExec round-trip + exec agree | done (sample suite + program-level) |
-| Universal ∀-instr encode proof (all encodable) | later (suite covers classes) |
+| `sameExec → execInstr` general theorem | done (`SameExec.lean`) |
+| Consumer doc: PF pipeline vs this package | done (`docs/for-proof-forge-consumers.md`) |
+| Universal ∀ encodable → roundTrip proof | later (samples + sameExec theorem cover the need) |
 | Label resolution / ELF packing | later |
 | Full Solana account/CPI dialect | out of scope |
 

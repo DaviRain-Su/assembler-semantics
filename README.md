@@ -46,7 +46,8 @@ No Mathlib dependency for the core skeleton (faster cold builds).
 
 See also:
 
-- [`docs/proof-forge-interface.md`](./docs/proof-forge-interface.md) — stable API for ProofForge
+- [`docs/for-proof-forge-consumers.md`](./docs/for-proof-forge-consumers.md) — **what PF needs / how Lean 拼汇编 fits**
+- [`docs/proof-forge-interface.md`](./docs/proof-forge-interface.md) — stable API surface
 - [`docs/diff-oracle.md`](./docs/diff-oracle.md) and [`tools/diff_oracle/`](./tools/diff_oracle/)
 
 ### ProofForge consumers

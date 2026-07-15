@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 — 2026-07-16
+
+### Meta-theory + consumer docs
+
+- `SameExec.lean`: general theorem `sameExec_execInstr` (`sameExec i j → execInstr equal`)
+  via `forExec` projection and `execInstr_forExec`
+- `docs/for-proof-forge-consumers.md`: product pipeline (Plan→AstNode→.s→sbpf→ELF) vs
+  this package’s L2/L3/L4 role; what Lean needs to “拼汇编”
+
 ## 0.1.1 — 2026-07-16
 
 ### Encode / well-formed preservation

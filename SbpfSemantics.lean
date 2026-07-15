@@ -6,6 +6,7 @@ import SbpfSemantics.Encode
 import SbpfSemantics.EncodeLemmas
 import SbpfSemantics.WellFormed
 import SbpfSemantics.EncodePreserve
+import SbpfSemantics.SameExec
 import SbpfSemantics.EncodeSem
 import SbpfSemantics.Machine
 import SbpfSemantics.Dialect
