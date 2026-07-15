@@ -1,14 +1,16 @@
 # assembler-semantics
 
-Formal semantics for **sBPF** (Solana BPF) in Lean 4, methodologically aligned
-with [powdr-labs/yul-semantics](https://github.com/powdr-labs/yul-semantics).
+Formal **assembly-layer** semantics for **sBPF** (Solana BPF) in Lean 4.
 
-This repository defines **ISA semantics + instruction encoding**. It is the
-foundation for a future verified assembler. The executable reference
-implementation is [blueshift-gg/sbpf](https://github.com/blueshift-gg/sbpf).
+**Scope (locked):** resolved instructions (L2), encode/decode (L3), small-step
+execution (L4), thin host dialect. **Not** text parsers, ELF linkers, or
+high-level compilers—those combine with this package via
+[`SbpfSemantics.Api`](./SbpfSemantics/Api.lean).
 
-See [`DESIGN.md`](./DESIGN.md) for scope, L0–L5 layering, V3 encoding notes, and
-what is deliberately **not** formalized (parser, ELF packaging, full runtime).
+See [`docs/SCOPE.md`](./docs/SCOPE.md) · [`DESIGN.md`](./DESIGN.md).
+
+Executable reference: [blueshift-gg/sbpf](https://github.com/blueshift-gg/sbpf)
+(instruction execute/encode as oracle).
 
 ## Design in short
 
@@ -50,11 +52,13 @@ See also:
 - [`docs/proof-forge-interface.md`](./docs/proof-forge-interface.md) — stable API surface
 - [`docs/diff-oracle.md`](./docs/diff-oracle.md) and [`tools/diff_oracle/`](./tools/diff_oracle/)
 
-### ProofForge consumers
+### Integrators (any package)
 
 ```lean
 import SbpfSemantics.Api
--- pfRun / pfEncode / Observation / hostExec
+open SbpfSemantics
+-- asmRun / asmEncode / asmStep / Observation / asmDefaultHost
+-- legacy aliases: pfRun, pfEncode, …
 ```
 
 ## What reuses sbpf vs what is rewritten in Lean

@@ -2,16 +2,32 @@
 
 This repository defines a formal semantics for **sBPF** (Solana BPF) in Lean 4,
 following the methodological template of
-[powdr-labs/yul-semantics](https://github.com/powdr-labs/yul-semantics).
+[powdr-labs/yul-semantics](https://github.com/powdr-labs/yul-semantics)
+and aligned with the *target* role of
+[powdr-labs/evm-semantics](https://github.com/powdr-labs/evm-semantics)
+(not `yul-compiler`).
 
-It is the foundation for a *future* verified assembler / encoding-correctness
-project. Scope of **this** repo: **ISA semantics + instruction encoding**, not
-the full blueshift `sbpf` toolchain.
+## Positioning (locked)
+
+**We only perfect the assembly / ISA layer** so other systems can combine with us:
+
+| We own | We do **not** own |
+|--------|-------------------|
+| L2 resolved `Instr` / `Program` | L0 `.s` parse, macros |
+| L3 encode/decode (V3) | L1 label AST / pretty-print |
+| L4 small-step + fuel run + adequacy | High-level IR / DSL / Plan |
+| Thin L5 host dialect interface | Full Solana runtime / CPI / ELF |
+
+Integrators (e.g. ProofForge) lower **to** `Array Instr`, then use `Api` for
+run / observe / encode. ELF packaging stays in external `sbpf` tools.
+Verified *compilers* (IR→sBPF), if any, are separate packages that **depend on**
+this one—analogous to `yul-compiler` depending on `yul-semantics` + `evm-semantics`.
+
+**Authoritative scope note:** [`docs/SCOPE.md`](docs/SCOPE.md).
 
 Primary executable reference:
 [blueshift-gg/sbpf](https://github.com/blueshift-gg/sbpf)
-(`crates/common` for opcodes/execute, `crates/vm` for the machine, `crates/assembler`
-for the text→ELF pipeline used as an oracle).
+(`crates/common` execute + encode; assembler only as oracle).
 
 ## Guiding decisions
 
@@ -21,12 +37,12 @@ We formalize **what resolved sBPF instructions mean when executed**, not how
 `.s` source text is lexed or how ELF headers are laid out.
 
 ```
-L0  .s text (+ macros/includes)     — out of scope (Rust preprocessor/parser)
-L1  surface AST (labels as names)   — deferred
-L2  resolved program (Instr list)   — Phase 1 entry ★
-L3  bytecode bytes                  — encode/decode layer
-L4  machine execution               — Step / Run ★
-L5  host syscalls                   — Dialect / oracle
+L0  .s text (+ macros/includes)     — OUT (other tools)
+L1  surface AST (labels as names)   — OUT (integrators)
+L2  resolved program (Instr list)   — ★ THIS REPO
+L3  bytecode bytes                  — ★ THIS REPO
+L4  machine execution               — ★ THIS REPO
+L5  host syscalls (thin Dialect)    — ★ interface + stubs only
 ```
 
 ### 2. Ground truth is a small-step relation
@@ -132,10 +148,12 @@ Lean, compare runs against `SbpfVm`.
 | WellFormed + encodable (V3-safe, imm fits) | done |
 | EncodePreserve: sameExec round-trip + exec agree | done (sample suite + program-level) |
 | `sameExec → execInstr` general theorem | done (`SameExec.lean`) |
-| Consumer doc: PF pipeline vs this package | done (`docs/for-proof-forge-consumers.md`) |
-| Universal ∀ encodable → roundTrip proof | later (samples + sameExec theorem cover the need) |
-| Label resolution / ELF packing | later |
-| Full Solana account/CPI dialect | out of scope |
+| `runFuel` ↔ `Steps` / `Run` adequacy | done (`Adequacy.lean`) |
+| Consumer docs + `docs/SCOPE.md` | done |
+| Stable `Api` (`asm*` + legacy `pf*`) | done |
+| Universal ∀ encodable → roundTrip proof | optional later |
+| Label resolution / ELF packing | **out of scope** |
+| Full Solana account/CPI / IR compiler | **out of scope** |
 
 ## Reference map (sbpf → Lean)
 

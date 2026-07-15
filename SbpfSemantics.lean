@@ -25,3 +25,4 @@ import SbpfSemantics.Examples
 import SbpfSemantics.DiffTests
 import SbpfSemantics.BridgeSketch
 import SbpfSemantics.CounterScenario
+-- Api already pulls Adequacy / SameExec; keep library root complete.

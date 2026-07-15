@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3 — 2026-07-16
+
+### Assembly-layer lock-in + adequacy
+
+- `docs/SCOPE.md`: explicit in/out of scope; integration handoff at `Array Instr`
+- Full `runFuel` ↔ `Steps` / `Run` adequacy (`runFuel_halted_steps`, `steps_runFuel_halted`, …)
+- `Api`: stable `asm*` names for integrators; keep `pf*` aliases
+- DESIGN/README: this package = ISA brick only (not compiler, not ELF)
+
 ## 0.1.2 — 2026-07-16
 
 ### Meta-theory + consumer docs

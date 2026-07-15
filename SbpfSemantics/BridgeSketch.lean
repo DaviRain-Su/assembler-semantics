@@ -34,7 +34,7 @@ def incrementFragment (delta : Word) : Program :=
 
 /-- Reference observation for increment-by-1 from zero. -/
 def incrementObs : Observation :=
-  pfRun pfClosedHost (incrementFragment 1#64) 32
+  pfRun pfClosedHost (incrementFragment 1#64) (fuel := 32)
 
 example : incrementObs.outcome = .halted 1#64 := by native_decide
 example : incrementObs.r0 = 1#64 := by native_decide
@@ -42,7 +42,7 @@ example : incrementObs.r0 = 1#64 := by native_decide
 /-- Encode preservation for the fragment (same as EncodeSem style). -/
 example :
     (pfDecode? (pfEncode (incrementFragment 3#64))).map
-        (fun P => (pfRun pfClosedHost P 32).r0)
+        (fun P => (pfRun pfClosedHost P (fuel := 32)).r0)
       = some 3#64 := by
   native_decide
 
@@ -50,7 +50,8 @@ example :
 def getFragment (count : Word) : Program :=
   #[.binImm .Mov64Imm r0 count, .exit]
 
-example : (pfRun pfClosedHost (getFragment 7#64) 16).r0 = 7#64 := by native_decide
+example : (pfRun pfClosedHost (getFragment 7#64) (fuel := 16)).r0 = 7#64 := by
+  native_decide
 
 /-- Host sketch: write a byte via memset then “return” it in r0. -/
 def memsetReturnByte : Program :=
@@ -64,13 +65,13 @@ def memsetReturnByte : Program :=
     .exit
   ]
 
-example : (pfRun pfDefaultHost memsetReturnByte 64).outcome = .halted 0x11#64 := by
+example : (pfRun pfDefaultHost memsetReturnByte (fuel := 64)).outcome = .halted 0x11#64 := by
   native_decide
 
 /-- Control-equality helper used by PF tests (only outcome + r0). -/
 example :
-    let a := pfRun pfClosedHost (incrementFragment 2#64) 32
-    let b := pfRun pfClosedHost (incrementFragment 2#64) 32
+    let a := pfRun pfClosedHost (incrementFragment 2#64) (fuel := 32)
+    let b := pfRun pfClosedHost (incrementFragment 2#64) (fuel := 32)
     Observation.controlEqb a b = true := by
   native_decide
 
