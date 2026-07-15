@@ -44,8 +44,17 @@ No Mathlib dependency for the core skeleton (faster cold builds).
 | `Determinism` / `Adequacy` | Meta-theory (core lemmas) |
 | `Examples` / `DiffTests` | `native_decide` goldens vs sbpf traces |
 
-See also [`docs/diff-oracle.md`](./docs/diff-oracle.md) and
-[`tools/diff_oracle/`](./tools/diff_oracle/).
+See also:
+
+- [`docs/proof-forge-interface.md`](./docs/proof-forge-interface.md) — stable API for ProofForge
+- [`docs/diff-oracle.md`](./docs/diff-oracle.md) and [`tools/diff_oracle/`](./tools/diff_oracle/)
+
+### ProofForge consumers
+
+```lean
+import SbpfSemantics.Api
+-- pfRun / pfEncode / Observation / hostExec
+```
 
 ## What reuses sbpf vs what is rewritten in Lean
 

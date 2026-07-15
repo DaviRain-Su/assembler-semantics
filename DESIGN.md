@@ -124,6 +124,7 @@ Lean, compare runs against `SbpfVm`.
 | Diff goldens (`DiffTests` + `tools/diff_oracle`) | done |
 | Encode semantic preservation (concrete programs) | done (`EncodeSem`) |
 | Host memory syscalls + abort halt | done (`Host`) |
+| ProofForge Api + Observation + bridge sketch | done |
 | General encode ∀-preservation proof | later |
 | Label resolution / ELF packing | later |
 
@@ -138,9 +139,25 @@ Lean, compare runs against `SbpfVm`.
 | `common/syscalls.rs` | `Dialect.lean` |
 | assembler fixtures | `Examples.lean` + external oracle |
 
+## ProofForge interface
+
+This package is the **Solana sBPF ISA foundation** for ProofForge (V1 formal
+lane and V2 `new_design` materializer). It is methodologically the Solana
+counterpart of EVM's `yul-semantics` / powdr bridge.
+
+- **Contract:** [`docs/proof-forge-interface.md`](docs/proof-forge-interface.md)
+- **Stable import:** `import SbpfSemantics.Api`
+- **Diff surface:** `Observation` / `runObserved` / `traceObserved`
+- **Sketch:** `SbpfSemantics.BridgeSketch` (hand-lowered increment fragment)
+
+Dependency is **one-way**: ProofForge may pin this repo; this repo never
+imports ProofForge. Product emit (`.s` → sbpf → ELF) may stay external;
+this package owns **meaning** of resolved instructions and observations.
+
 ## Non-goals (Phase 1)
 
 - Binary compatibility proof against Agave `solana_rbpf` (second oracle later).
 - Verified text parser or macro expansion.
 - CU accounting and denial-of-service bounds.
 - Full cryptographic fidelity of syscalls.
+- ProofForge DSL, account layout, CPI policy, or ELF packaging.
