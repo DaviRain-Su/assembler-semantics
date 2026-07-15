@@ -23,6 +23,9 @@ Goals for this layer:
 2. Executable semantics + relational `Step` with adequacy.
 3. Encoding facts so L2 ↔ L3 is trustworthy.
 4. Thin host dialect so integrators plug real Solana runtime later.
+5. L3↔L4 **layout** facts (index ↔ byte at instruction starts) — see `ByteLayout`.
+
+Planning (deferred vs next): **`docs/ROADMAP.md`**.
 
 ## Out of scope (other components own these)
 

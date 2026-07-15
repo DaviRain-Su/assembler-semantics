@@ -51,6 +51,7 @@ No Mathlib dependency for the core skeleton (faster cold builds).
 See also:
 
 - [`docs/SCOPE.md`](./docs/SCOPE.md) — locked assembly-layer scope
+- [`docs/ROADMAP.md`](./docs/ROADMAP.md) — deferred work vs next layout focus
 - [`docs/API_FREEZE.md`](./docs/API_FREEZE.md) — stable `asm*` surface
 - [`docs/divergences.md`](./docs/divergences.md) — Lean vs sbpf / solanalib diffs
 - [`docs/for-proof-forge-consumers.md`](./docs/for-proof-forge-consumers.md) — **what PF needs / how Lean 拼汇编 fits**

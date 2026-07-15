@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.6 — 2026-07-16
+
+### Layout formalization + roadmap
+
+- `docs/ROADMAP.md`: deferred items (∀ roundTrip, coinductive bisim, solanalib bridge)
+  and **active** direction (index ↔ byte layout lemmas)
+- `ByteLayout` refactored to list prefix-sum `offsetsFrom` / `findOffsetIdx`
+- Theorems: `sizeBytes_*`, `byteOffsets_size`, `index_to_byte_to_index`,
+  `indexToByte_byteToIndex`, `byte_to_index_to_byte`, `byteOffsets_zero`
+- Api: `asmIndexByteRoundtrip`, `asmIndexToByte_byteToIndex`
+- ByteBisim: `entry_toBytePc_zero` from layout facts
+
 ## 0.1.5 — 2026-07-16
 
 ### P0–P2 priority package (round-trip, bisim, size, adequacy, freeze)

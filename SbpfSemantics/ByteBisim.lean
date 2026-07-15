@@ -111,4 +111,18 @@ theorem sample_step_regs_agree :
     listByteStepAgree closedExec byteStepSampleProg (Machine.entry) = true :=
   sample_first_step_list_byte_agree
 
+/-- Any machine at list PC 0 lifts to byte PC 0 when the program is non-empty. -/
+theorem toBytePc_pc0 (P : Program) (m : Machine) (h : 0 < P.size) (hpc : m.pc = 0) :
+    (toBytePc P m).map (·.pc) = some 0 := by
+  simp only [toBytePc, indexToByteOffset?, hpc]
+  have h0 : 0 < P.byteOffsets.size := by simpa [byteOffsets_size] using h
+  have hz := byteOffsets_zero P h
+  rw [Array.getElem?_eq_getElem h0, hz]
+  rfl
+
+/-- Entry machine (pc = 0) → byte PC 0. -/
+theorem entry_toBytePc_zero (P : Program) (h : 0 < P.size) :
+    (toBytePc P (Machine.entry)).map (·.pc) = some 0 :=
+  toBytePc_pc0 P (Machine.entry) h rfl
+
 end SbpfSemantics

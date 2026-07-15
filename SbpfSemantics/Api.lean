@@ -107,6 +107,18 @@ theorem asmV3SafeRoundTripWitnesses :
     allV3SafeWitnessRoundTrip = true :=
   all_v3_safe_opcodes_have_roundtrip_witness
 
+/-- Layout: list index → byte offset → list index (in-range PC). -/
+theorem asmIndexByteRoundtrip (P : Program) (pc : Nat) (h : pc < P.size) :
+    byteOffsetToIndex? P.byteOffsets
+        (P.byteOffsets[pc]'(by simpa [byteOffsets_size] using h)) = some pc :=
+  index_to_byte_to_index P pc h
+
+/-- Layout: Option-form index ↔ byte round-trip. -/
+theorem asmIndexToByte_byteToIndex (P : Program) (pc : Nat) (h : pc < P.size) :
+    (indexToByteOffset? P.byteOffsets pc).bind (byteOffsetToIndex? P.byteOffsets) =
+      some pc :=
+  indexToByte_byteToIndex P pc h
+
 /-! ### Machine helpers -/
 
 def asmEntry (input : Array UInt8 := #[]) (rodata : Array UInt8 := #[]) : Machine :=

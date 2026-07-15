@@ -20,6 +20,7 @@ import SbpfSemantics.Api
 | `asmEncodable`, `asmSameExec`, `asmRoundTrip` | Encode checks |
 | `asmEncodeInstr_size`, `asmEncode_size` | Encode length theorems |
 | `asmV3SafeRoundTripWitnesses` | V3 opcode witness table |
+| `asmIndexByteRoundtrip`, `asmIndexToByte_byteToIndex` | Layout index ↔ byte |
 | `asmEntry`, `asmEntryCell`, `asmReadyForNext` | Machine setup |
 
 ### Compatibility aliases (`pf*`)
