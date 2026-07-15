@@ -35,7 +35,7 @@ No Mathlib dependency for the core skeleton (faster cold builds).
 |--------|------|
 | `Opcode` | Opcode enum, V3 byte maps, op classes |
 | `Instr` | Resolved instruction AST + program |
-| `Encode` / `EncodeLemmas` / `EncodeSem` | encode/decode + V3 facts + semantic preservation goldens |
+| `Encode` / `WellFormed` / `EncodePreserve` / `EncodeSem` | encode/decode, WF, round-trip + exec preserve |
 | `Machine` | Registers, PC, memory, call stack |
 | `Alu` | Classic ALU + SIMD-0174 PQR |
 | `Dialect` / `Host` | Syscall hosts (`closed` / `noop` / `stub` / `host`) |

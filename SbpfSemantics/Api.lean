@@ -10,6 +10,8 @@ import SbpfSemantics.Run
 import SbpfSemantics.Interp
 import SbpfSemantics.Observation
 import SbpfSemantics.AccountLayout
+import SbpfSemantics.WellFormed
+import SbpfSemantics.EncodePreserve
 
 /-!
 # SbpfSemantics.Api
@@ -62,5 +64,13 @@ def pfDecode? (bs : Array UInt8) : Option Program :=
 /-- Convenience: entry machine with a Counter-style input cell. -/
 def pfEntryCell (value : Word) (cell : InputCell := counterCell) : Machine :=
   Machine.entryWithCell cell value
+
+/-- Encode-safe check (V3-safe opcode, no host name, imm fits field). -/
+def pfEncodable (i : Instr) : Bool :=
+  Instr.encodable i
+
+/-- Execution-relevant equality after normalize. -/
+def pfSameExec (i j : Instr) : Bool :=
+  Instr.sameExec i j
 
 end SbpfSemantics

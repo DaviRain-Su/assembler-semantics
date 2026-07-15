@@ -129,9 +129,11 @@ Lean, compare runs against `SbpfVm`.
 | Opcode coverage table (138) | done |
 | Return data host (`sol_set/get_return_data`) | done |
 | **Phase 1 delivery** | **complete** |
-| General encode ∀-preservation proof | Phase 2 |
-| Label resolution / ELF packing | Phase 2 |
-| Full Solana account/CPI dialect | Phase 2 / ProofForge |
+| WellFormed + encodable (V3-safe, imm fits) | done |
+| EncodePreserve: sameExec round-trip + exec agree | done (sample suite + program-level) |
+| Universal ∀-instr encode proof (all encodable) | later (suite covers classes) |
+| Label resolution / ELF packing | later |
+| Full Solana account/CPI dialect | out of scope |
 
 ## Reference map (sbpf → Lean)
 

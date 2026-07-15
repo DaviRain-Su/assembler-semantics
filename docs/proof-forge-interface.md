@@ -51,6 +51,8 @@ blueshift sbpf · Mollusk · solanalib · Agave
 | `AccountLayout` / `pfEntryCell` | input-region cells for portable state |
 | `CounterScenario` | init / increment / get L2 programs + goldens |
 | `Machine.readyForNext` | multi-entrypoint scenario chaining |
+| `Instr.wellFormed` / `Instr.encodable` | shape + V3-safe encode domain |
+| `Instr.sameExec` / `decodeEncode?` | execution-relevant encode round-trip |
 
 ### What is *not* stable (may change without major version)
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1 — 2026-07-16
+
+### Encode / well-formed preservation
+
+- `WellFormed`: operand shape + `Instr.encodable` (V3-safe, no host name, imm fits i32 field)
+- `EncodePreserve`: `sameExec`, `roundTripSameExec`, sample suite across op classes
+- Closed-world `execInstr` agreement after `decodeEncode?` (batch + program redecode)
+- Documents that decode is not bit-identical (fills unused regs/offs); equality is execution-relevant
+
 ## 0.1.0 — 2026-07-16
 
 ### Phase 1 complete (ISA semantics foundation)
