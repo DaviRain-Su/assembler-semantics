@@ -3,17 +3,17 @@ import SbpfSemantics.Opcode
 import SbpfSemantics.Instr
 import SbpfSemantics.Machine
 import SbpfSemantics.Dialect
+import SbpfSemantics.Alu
 
 /-!
 # SbpfSemantics.Step
 
 Small-step executable semantics for resolved instructions, derived from
-blueshift `sbpf` `crates/common/src/execute/*`.
+blueshift `sbpf` `crates/common/src/execute/*` (classic) and SIMD-0174 (PQR).
 
-Ground truth for the closed dialect is the partial function `execInstr`;
+Ground truth for an `ExecDialect` is the partial function `execStep`;
 the relational form is `Step D P m m'`.
 -/
-
 
 namespace SbpfSemantics
 
@@ -30,135 +30,23 @@ def doJump (m : Machine) (off : Off16) : Machine :=
   let pc' := (m.pc : Int) + 1 + off.toInt
   m.setPc pc'.toNat
 
-/-- 64-bit binary op with immediate. -/
-def execBin64Imm (m : Machine) (op : Opcode) (dst : Reg) (imm : Word) : Option Machine :=
-  let a := m.getReg dst
-  let b := imm
-  match op with
-  | .Add64Imm => some ((m.setReg dst (a + b)).advancePc)
-  | .Sub64Imm => some ((m.setReg dst (a - b)).advancePc)
-  | .Mul64Imm => some ((m.setReg dst (a * b)).advancePc)
-  | .Or64Imm  => some ((m.setReg dst (a ||| b)).advancePc)
-  | .And64Imm => some ((m.setReg dst (a &&& b)).advancePc)
-  | .Xor64Imm => some ((m.setReg dst (a ^^^ b)).advancePc)
-  | .Mov64Imm => some ((m.setReg dst b).advancePc)
-  | .Lsh64Imm => some ((m.setReg dst (a <<< b.toNat)).advancePc)
-  | .Rsh64Imm => some ((m.setReg dst (a >>> b.toNat)).advancePc)
-  | .Arsh64Imm =>
-      -- arithmetic shift: cast via signed Int
-      let sh := b.toNat
-      let v := BitVec.ofInt 64 (a.toInt >>> sh)
-      some ((m.setReg dst v).advancePc)
-  | .Div64Imm | .Mod64Imm =>
-      if b == 0#64 then none
-      else
-        let v := if op == .Div64Imm then a / b else a % b
-        some ((m.setReg dst v).advancePc)
-  | .Hor64Imm => some ((m.setReg dst (a ||| (b <<< 32))).advancePc)
-  | _ => none
-
-/-- 64-bit binary op with register source. -/
-def execBin64Reg (m : Machine) (op : Opcode) (dst src : Reg) : Option Machine :=
-  let a := m.getReg dst
-  let b := m.getReg src
-  match op with
-  | .Add64Reg => some ((m.setReg dst (a + b)).advancePc)
-  | .Sub64Reg => some ((m.setReg dst (a - b)).advancePc)
-  | .Mul64Reg => some ((m.setReg dst (a * b)).advancePc)
-  | .Or64Reg  => some ((m.setReg dst (a ||| b)).advancePc)
-  | .And64Reg => some ((m.setReg dst (a &&& b)).advancePc)
-  | .Xor64Reg => some ((m.setReg dst (a ^^^ b)).advancePc)
-  | .Mov64Reg => some ((m.setReg dst b).advancePc)
-  | .Lsh64Reg => some ((m.setReg dst (a <<< b.toNat)).advancePc)
-  | .Rsh64Reg => some ((m.setReg dst (a >>> b.toNat)).advancePc)
-  | .Arsh64Reg =>
-      let v := BitVec.ofInt 64 (a.toInt >>> b.toNat)
-      some ((m.setReg dst v).advancePc)
-  | .Div64Reg | .Mod64Reg =>
-      if b == 0#64 then none
-      else
-        let v := if op == .Div64Reg then a / b else a % b
-        some ((m.setReg dst v).advancePc)
-  | _ => none
-
-/-- 32-bit ALU with imm: operate on low 32, zero-extend result (sbpf convention for many ops). -/
-def execBin32Imm (m : Machine) (op : Opcode) (dst : Reg) (imm : Word) : Option Machine :=
-  let a32 := toWord32 (m.getReg dst)
-  let b32 := toWord32 imm
-  let put (v32 : Word32) := (m.setReg dst (ofWord32 v32)).advancePc
-  match op with
-  | .Add32Imm => some (put (a32 + b32))
-  | .Sub32Imm => some (put (a32 - b32))
-  | .Mul32Imm => some (put (a32 * b32))
-  | .Or32Imm  => some (put (a32 ||| b32))
-  | .And32Imm => some (put (a32 &&& b32))
-  | .Xor32Imm => some (put (a32 ^^^ b32))
-  | .Mov32Imm => some (put b32)
-  | .Lsh32Imm => some (put (a32 <<< b32.toNat))
-  | .Rsh32Imm => some (put (a32 >>> b32.toNat))
-  | .Arsh32Imm =>
-      let v := BitVec.ofInt 32 (a32.toInt >>> b32.toNat)
-      some (put v)
-  | .Div32Imm | .Mod32Imm =>
-      if b32 == 0#32 then none
-      else
-        let v := if op == .Div32Imm then a32 / b32 else a32 % b32
-        some (put v)
-  | _ => none
-
-def execBin32Reg (m : Machine) (op : Opcode) (dst src : Reg) : Option Machine :=
-  let a32 := toWord32 (m.getReg dst)
-  let b32 := toWord32 (m.getReg src)
-  let put (v32 : Word32) := (m.setReg dst (ofWord32 v32)).advancePc
-  match op with
-  | .Add32Reg => some (put (a32 + b32))
-  | .Sub32Reg => some (put (a32 - b32))
-  | .Mul32Reg => some (put (a32 * b32))
-  | .Or32Reg  => some (put (a32 ||| b32))
-  | .And32Reg => some (put (a32 &&& b32))
-  | .Xor32Reg => some (put (a32 ^^^ b32))
-  | .Mov32Reg => some (put b32)
-  | .Lsh32Reg => some (put (a32 <<< b32.toNat))
-  | .Rsh32Reg => some (put (a32 >>> b32.toNat))
-  | .Arsh32Reg =>
-      let v := BitVec.ofInt 32 (a32.toInt >>> b32.toNat)
-      some (put v)
-  | .Div32Reg | .Mod32Reg =>
-      if b32 == 0#32 then none
-      else
-        let v := if op == .Div32Reg then a32 / b32 else a32 % b32
-        some (put v)
-  | _ => none
-
-def execUnary (m : Machine) (op : Opcode) (dst : Reg) : Option Machine :=
-  match op with
-  | .Neg64 =>
-      let v := 0#64 - m.getReg dst
-      some ((m.setReg dst v).advancePc)
-  | .Neg32 =>
-      let v32 := 0#32 - toWord32 (m.getReg dst)
-      some ((m.setReg dst (ofWord32 v32)).advancePc)
-  | _ => none
-
 def execEndian (m : Machine) (op : Opcode) (dst : Reg) (imm : Word) : Option Machine :=
   let w := m.getReg dst
   let bits := imm.toNat
   match op, bits with
-  | .Le, 16 =>
-      -- little-endian convert: on LE host this is identity on the low bits
-      some ((m.setReg dst (w &&& 0xffff#64)).advancePc)
-  | .Le, 32 => some ((m.setReg dst (w &&& 0xffffffff#64)).advancePc)
+  | .Le, 16 => some (put64 m dst (w &&& 0xffff#64))
+  | .Le, 32 => some (put64 m dst (w &&& 0xffffffff#64))
   | .Le, 64 => some (m.advancePc)
   | .Be, 16 =>
       let x := (w &&& 0xffff#64).toNat
       let swapped := ((x &&& 0xff) <<< 8) + ((x >>> 8) &&& 0xff)
-      some ((m.setReg dst (BitVec.ofNat 64 swapped)).advancePc)
+      some (put64 m dst (BitVec.ofNat 64 swapped))
   | .Be, 32 =>
       let x := (w &&& 0xffffffff#64).toNat
       let swapped :=
         ((x &&& 0xff) <<< 24) + (((x >>> 8) &&& 0xff) <<< 16) +
         (((x >>> 16) &&& 0xff) <<< 8) + ((x >>> 24) &&& 0xff)
-      some ((m.setReg dst (BitVec.ofNat 64 swapped)).advancePc)
+      some (put64 m dst (BitVec.ofNat 64 swapped))
   | .Be, 64 =>
       let x := w.toNat
       let b0 := x &&& 0xff
@@ -172,7 +60,7 @@ def execEndian (m : Machine) (op : Opcode) (dst : Reg) (imm : Word) : Option Mac
       let swapped :=
         (b0 <<< 56) + (b1 <<< 48) + (b2 <<< 40) + (b3 <<< 32) +
         (b4 <<< 24) + (b5 <<< 16) + (b6 <<< 8) + b7
-      some ((m.setReg dst (BitVec.ofNat 64 swapped)).advancePc)
+      some (put64 m dst (BitVec.ofNat 64 swapped))
   | _, _ => none
 
 def condJump (m : Machine) (take : Bool) (off : Off16) : Machine :=
@@ -180,7 +68,6 @@ def condJump (m : Machine) (take : Bool) (off : Off16) : Machine :=
 
 def execJumpImm (m : Machine) (op : Opcode) (dst : Reg) (imm : Word) (off : Off16) : Option Machine :=
   let a := m.getReg dst
-  -- 64-bit path: imm as sign-extended i32 pattern already in Word for simple imms
   let b := imm
   let a32 := toWord32 a
   let b32 := toWord32 imm
@@ -254,6 +141,11 @@ def execCallRel (m : Machine) (off : Word) : Option Machine := do
   let target := (m.pc : Int) + 1 + off.toInt
   pure (m.setPc target.toNat)
 
+/-- Host syscall via dialect; return value written to `r0`. -/
+def execSyscall (D : ExecDialect) (m : Machine) (name : String) : Option Machine := do
+  let (m', r) ← D.syscallFn name m
+  some ((m'.setReg ⟨0, by omega⟩ r).advancePc)
+
 def execCallx (m : Machine) (r : Reg) : Option Machine := do
   if r.val ≥ 10 then none
   else
@@ -282,16 +174,15 @@ def execExit (m : Machine) : Option Machine :=
   | none =>
       some (m.halt (m.getReg ⟨0, by omega⟩))
 
-/-- Execute a single resolved instruction (no fetch). Syscalls use `D`. -/
-def execInstr (_D : ExecDialect) (m : Machine) (i : Instr) : Option Machine :=
+/-- Execute a single resolved instruction (no fetch). -/
+def execInstr (D : ExecDialect) (m : Machine) (i : Instr) : Option Machine :=
   if m.halted.isSome then none
   else
     match i.opcode.opClass with
     | .loadImm => do
         let dst ← requireReg i.dst
         let imm ← requireImm i.imm
-        -- lddw
-        some ((m.setReg dst imm).advancePc)
+        some (put64 m dst imm)
     | .loadMem => do
         let dst ← requireReg i.dst
         let src ← requireReg i.src
@@ -300,16 +191,16 @@ def execInstr (_D : ExecDialect) (m : Machine) (i : Instr) : Option Machine :=
         match i.opcode with
         | .Ldxb =>
             let v ← m.mem.readU8 addr
-            some ((m.setReg dst v).advancePc)
+            some (put64 m dst v)
         | .Ldxh =>
             let v ← m.mem.readU16 addr
-            some ((m.setReg dst v).advancePc)
+            some (put64 m dst v)
         | .Ldxw =>
             let v ← m.mem.readU32 addr
-            some ((m.setReg dst v).advancePc)
+            some (put64 m dst v)
         | .Ldxdw =>
             let v ← m.mem.readU64 addr
-            some ((m.setReg dst v).advancePc)
+            some (put64 m dst v)
         | _ => none
     | .storeImm => do
         let dst ← requireReg i.dst
@@ -356,26 +247,30 @@ def execInstr (_D : ExecDialect) (m : Machine) (i : Instr) : Option Machine :=
         match i.opcode with
         | .Add64Imm | .Sub64Imm | .Mul64Imm | .Div64Imm | .Mod64Imm
         | .Or64Imm | .And64Imm | .Xor64Imm | .Mov64Imm
-        | .Lsh64Imm | .Rsh64Imm | .Arsh64Imm | .Hor64Imm =>
+        | .Lsh64Imm | .Rsh64Imm | .Arsh64Imm | .Hor64Imm
+        | .Lmul64Imm | .Uhmul64Imm | .Udiv64Imm | .Urem64Imm
+        | .Shmul64Imm | .Sdiv64Imm | .Srem64Imm =>
             execBin64Imm m i.opcode dst imm
         | .Add32Imm | .Sub32Imm | .Mul32Imm | .Div32Imm | .Mod32Imm
         | .Or32Imm | .And32Imm | .Xor32Imm | .Mov32Imm
-        | .Lsh32Imm | .Rsh32Imm | .Arsh32Imm =>
+        | .Lsh32Imm | .Rsh32Imm | .Arsh32Imm
+        | .Lmul32Imm | .Udiv32Imm | .Urem32Imm | .Sdiv32Imm | .Srem32Imm =>
             execBin32Imm m i.opcode dst imm
-        | _ =>
-            -- remaining specialized mul/div variants: fall back to 64/32 patterns if named
-            none
+        | _ => none
     | .binReg => do
         let dst ← requireReg i.dst
         let src ← requireReg i.src
         match i.opcode with
         | .Add64Reg | .Sub64Reg | .Mul64Reg | .Div64Reg | .Mod64Reg
         | .Or64Reg | .And64Reg | .Xor64Reg | .Mov64Reg
-        | .Lsh64Reg | .Rsh64Reg | .Arsh64Reg =>
+        | .Lsh64Reg | .Rsh64Reg | .Arsh64Reg
+        | .Lmul64Reg | .Uhmul64Reg | .Udiv64Reg | .Urem64Reg
+        | .Shmul64Reg | .Sdiv64Reg | .Srem64Reg =>
             execBin64Reg m i.opcode dst src
         | .Add32Reg | .Sub32Reg | .Mul32Reg | .Div32Reg | .Mod32Reg
         | .Or32Reg | .And32Reg | .Xor32Reg | .Mov32Reg
-        | .Lsh32Reg | .Rsh32Reg | .Arsh32Reg =>
+        | .Lsh32Reg | .Rsh32Reg | .Arsh32Reg
+        | .Lmul32Reg | .Udiv32Reg | .Urem32Reg | .Sdiv32Reg | .Srem32Reg =>
             execBin32Reg m i.opcode dst src
         | _ => none
     | .unary => do
@@ -399,13 +294,12 @@ def execInstr (_D : ExecDialect) (m : Machine) (i : Instr) : Option Machine :=
         let off ← requireOff i.off
         execJumpReg m i.opcode dst src off
     | .callImm =>
-        -- Phase 1: imm is always a relative PC offset (internal call).
-        -- Named syscalls are modeled by a separate constructor later / Dialect
-        -- when the assembler resolves them as `Call` with a side table.
-        -- For now use Dialect only when imm is none and we pass a name via src — not used.
-        match i.imm with
-        | some off => execCallRel m off
-        | none => none
+        match i.syscall with
+        | some name => execSyscall D m name
+        | none =>
+          match i.imm with
+          | some off => execCallRel m off
+          | none => none
     | .callReg => do
         let r ← requireReg i.dst
         execCallx m r

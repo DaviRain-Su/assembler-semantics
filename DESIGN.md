@@ -112,13 +112,16 @@ Lean, compare runs against `SbpfVm`.
 
 | Artifact | Status |
 |----------|--------|
-| Opcode enum + V3 byte maps | Phase 1a |
-| Instr AST + encode/decode | Phase 1a |
-| Machine + closed execStep | Phase 1b |
-| Relational Step + Run | Phase 1b |
-| Determinism (closed) | Phase 1b |
-| Fuel interpreter + adequacy | Phase 1b (core), extend over time |
-| Syscall dialect interface | Phase 1c |
+| Opcode enum + V3 byte maps | done |
+| Instr AST + encode/decode | done |
+| Machine + closed execStep | done |
+| Classic ALU (match sbpf execute) | done |
+| PQR ALU (SIMD-0174) | done |
+| Relational Step + Run | done |
+| Determinism (closed step) | done |
+| Fuel interpreter + adequacy skeleton | done |
+| Syscall dialect (`closed`/`noop`/`stub`) | done |
+| Diff goldens (`DiffTests`) | done |
 | Full encode semantic preservation | Phase 2 |
 | Label resolution / ELF packing | later |
 

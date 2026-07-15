@@ -25,6 +25,10 @@ structure Instr where
   /-- Immediate. For `lddw` this is the full 64-bit value; for other ops the
   low 32 bits are encoded (with sign extension on decode of the i32 field). -/
   imm    : Option Word := none
+  /-- When `opcode = .Call` and this is `some name`, execute a host syscall
+  instead of a PC-relative internal call. Names are not part of the 8-byte
+  encoding (assembler uses relocation / dynsym); they exist only at L2. -/
+  syscall : Option String := none
   deriving Repr, Inhabited, DecidableEq
 
 /-- Program = ordered list of resolved instructions (PC is an index into this). -/
@@ -73,6 +77,10 @@ def lddw (dst : Reg) (imm : Word) : Instr :=
 
 def callRel (off : Word) : Instr :=
   { opcode := .Call, imm := some off }
+
+/-- Host syscall by name (open-world `Dialect`). -/
+def callSyscall (name : String) : Instr :=
+  { opcode := .Call, syscall := some name }
 
 def callx (target : Reg) : Instr :=
   { opcode := .Callx, dst := some target }
