@@ -46,8 +46,11 @@ blueshift sbpf · Mollusk · solanalib · Agave
 | `execStep`, `Step`, `runFuel`, `interp`, `interpEntry` | execution |
 | `Outcome` | `halted` / `stuck` / `outOfFuel` |
 | `encodeInstr`, `encodeProgram`, `decodeInstr?`, `decodeProgram?` | L3 |
-| `Observation`, `observe`, `TraceEvent` | PF differential surface |
-| `runObserved` | fuel run → final observation |
+| `Observation`, `observe`, `TraceEvent` | PF differential surface (incl. `returnData`) |
+| `runObserved` / `pfRun` / `pfRunMachine` | fuel run → final observation |
+| `AccountLayout` / `pfEntryCell` | input-region cells for portable state |
+| `CounterScenario` | init / increment / get L2 programs + goldens |
+| `Machine.readyForNext` | multi-entrypoint scenario chaining |
 
 ### What is *not* stable (may change without major version)
 

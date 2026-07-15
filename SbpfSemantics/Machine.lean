@@ -152,6 +152,8 @@ structure Machine where
   frames     : List CallFrame := []
   maxDepth   : Nat := defaultMaxCallDepth
   halted     : Option Word := none
+  /-- Last `sol_set_return_data` payload (host-visible). -/
+  returnData : Array UInt8 := #[]
   deriving Inhabited
 
 namespace Machine
@@ -188,6 +190,20 @@ def popFrame (m : Machine) : Option (CallFrame × Machine) :=
 
 def halt (m : Machine) (code : Word) : Machine :=
   { m with halted := some code }
+
+/-- Reset control state for a new entrypoint invocation while keeping memory
+(and thus account/input data). Used by multi-instruction PF scenarios. -/
+def readyForNext (m : Machine) : Machine :=
+  let m : Machine := {
+    m with
+    halted := none
+    pc := 0
+    frames := []
+    returnData := #[]
+    regs := Vector.replicate 11 word0
+  }
+  let m := m.setReg ⟨1, by omega⟩ inputStart
+  m.setReg ⟨10, by omega⟩ m.mem.initialFp
 
 end Machine
 

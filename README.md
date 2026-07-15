@@ -64,6 +64,16 @@ import SbpfSemantics.Api
 | Assembler fixtures & VM runs | (differential tests later) |
 | Parser, macros, ELF emit | **not** Phase 1 |
 
+## Phase 1 status
+
+**Complete** for the scoped deliverable: sBPF ISA semantics + encoding + host
+stubs + ProofForge observation API + Counter L2 scenarios. See `CHANGELOG.md`.
+
+```bash
+lake build
+python3 tools/diff_oracle/check_vectors.py
+```
+
 ## License
 
-TBD (sbpf is Apache-2.0 / MIT; yul-semantics is Apache-2.0).
+Apache-2.0 (see [`LICENSE`](./LICENSE)).

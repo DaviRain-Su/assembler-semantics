@@ -71,6 +71,24 @@ def hostMemcmp (m : Machine) : Option HostResult := do
   let mem ← m.mem.writeU32 resultPtr diff32
   pure ({ m with mem := mem }, word0)
 
+/-- `sol_set_return_data(ptr, len)` — args `r1`, `r2`. -/
+def hostSetReturnData (m : Machine) : Option HostResult := do
+  let ptr := m.arg 0
+  let n := (m.arg 1).toNat
+  let data ← m.mem.readBytes ptr n
+  pure ({ m with returnData := data }, word0)
+
+/-- `sol_get_return_data` simplified: write length to `r0` via return value;
+copy min(len, buf_len) bytes to `r1` buffer; `r2` is buf capacity.
+Full Solana ABI also returns program id; we only model the data blob. -/
+def hostGetReturnData (m : Machine) : Option HostResult := do
+  let dst := m.arg 0
+  let cap := (m.arg 1).toNat
+  let n := min cap m.returnData.size
+  let slice := m.returnData.extract 0 n
+  let mem ← m.mem.writeBytes dst slice
+  pure ({ m with mem := mem }, BitVec.ofNat 64 m.returnData.size)
+
 /-- Dispatch known host ops; `none` means stuck. -/
 def hostSyscallFn (name : String) (m : Machine) : Option HostResult :=
   if isLogSyscall name then some (hostLog m)
@@ -79,6 +97,8 @@ def hostSyscallFn (name : String) (m : Machine) : Option HostResult :=
   else if name == "sol_memmove_" then hostMemmove m
   else if name == "sol_memset_" then hostMemset m
   else if name == "sol_memcmp_" then hostMemcmp m
+  else if name == "sol_set_return_data" then hostSetReturnData m
+  else if name == "sol_get_return_data" then hostGetReturnData m
   else none
 
 /-- Relational image of `hostSyscallFn`. -/

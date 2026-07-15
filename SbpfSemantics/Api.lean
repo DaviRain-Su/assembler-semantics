@@ -9,6 +9,7 @@ import SbpfSemantics.Step
 import SbpfSemantics.Run
 import SbpfSemantics.Interp
 import SbpfSemantics.Observation
+import SbpfSemantics.AccountLayout
 
 /-!
 # SbpfSemantics.Api
@@ -21,9 +22,6 @@ depending on this package. Symbols listed here are covered by
 -/
 
 namespace SbpfSemantics
-
--- Re-export core types by being imported; this module is the documentation
--- anchor. Additional aliases keep the contract readable in one place.
 
 /-- Alias: L2 program. -/
 abbrev PfProgram := Program
@@ -48,6 +46,11 @@ def pfRun (D : ExecDialect) (P : Program) (fuel : Nat := 10_000)
     (input : Array UInt8 := #[]) (rodata : Array UInt8 := #[]) : Observation :=
   runObservedEntry D P fuel input rodata
 
+/-- Run with a pre-built machine (e.g. `entryWithCell`). -/
+def pfRunMachine (D : ExecDialect) (P : Program) (m : Machine) (fuel : Nat := 10_000) :
+    Observation :=
+  runObserved D P fuel m
+
 /-- Encode a PF-lowered program to bytecode (V3 bytes). -/
 def pfEncode (P : Program) : Array UInt8 :=
   encodeProgram P
@@ -55,5 +58,9 @@ def pfEncode (P : Program) : Array UInt8 :=
 /-- Decode bytecode to a program (V3). -/
 def pfDecode? (bs : Array UInt8) : Option Program :=
   decodeProgram? bs
+
+/-- Convenience: entry machine with a Counter-style input cell. -/
+def pfEntryCell (value : Word) (cell : InputCell := counterCell) : Machine :=
+  Machine.entryWithCell cell value
 
 end SbpfSemantics

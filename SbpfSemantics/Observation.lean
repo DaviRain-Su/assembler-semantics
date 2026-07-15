@@ -18,12 +18,13 @@ namespace SbpfSemantics
 
 /-- Portable observation of a finished (or stuck) run. -/
 structure Observation where
-  outcome : Outcome
-  r0      : Word
-  r1      : Word
-  r10     : Word
-  pc      : Nat
-  halted  : Option Word
+  outcome    : Outcome
+  r0         : Word
+  r1         : Word
+  r10        : Word
+  pc         : Nat
+  halted     : Option Word
+  returnData : Array UInt8 := #[]
   deriving DecidableEq, Repr
 
 /-- Project machine + outcome to an observation. -/
@@ -34,6 +35,7 @@ def observe (m : Machine) (o : Outcome) : Observation where
   r10 := m.getReg ⟨10, by omega⟩
   pc := m.pc
   halted := m.halted
+  returnData := m.returnData
 
 /-- Fuel run returning the final observation. -/
 def runObserved (D : ExecDialect) (P : Program) (fuel : Nat) (m : Machine) : Observation :=

@@ -125,8 +125,13 @@ Lean, compare runs against `SbpfVm`.
 | Encode semantic preservation (concrete programs) | done (`EncodeSem`) |
 | Host memory syscalls + abort halt | done (`Host`) |
 | ProofForge Api + Observation + bridge sketch | done |
-| General encode ∀-preservation proof | later |
-| Label resolution / ELF packing | later |
+| Account input cells + CounterScenario | done |
+| Opcode coverage table (138) | done |
+| Return data host (`sol_set/get_return_data`) | done |
+| **Phase 1 delivery** | **complete** |
+| General encode ∀-preservation proof | Phase 2 |
+| Label resolution / ELF packing | Phase 2 |
+| Full Solana account/CPI dialect | Phase 2 / ProofForge |
 
 ## Reference map (sbpf → Lean)
 
