@@ -12,7 +12,8 @@ and not an ELF linker. Those integrate **on top of** or **beside** this package.
 |-------|---------|---------|
 | **L2** | Resolved `Instr` / `Program` (numeric operands) | `Instr`, `WellFormed` |
 | **L3** | Encode / decode (V3) | `Encode`, `EncodePreserve`, `SameExec` |
-| **L4** | Small-step + fuel run | `Step`, `Run`, `Interp`, `Adequacy` |
+| **L3↔L4** | Byte-PC view over encoded stream | `ByteLayout`, `ByteStep` |
+| **L4** | Small-step + fuel run (list PC) | `Step`, `Run`, `Interp`, `Adequacy` |
 | **L5 thin** | Host *interface* + minimal stubs | `Dialect`, `Host` |
 | **Observation** | Diff surface for integrators | `Observation`, `Api` |
 

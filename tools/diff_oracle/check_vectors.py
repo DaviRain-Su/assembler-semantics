@@ -34,18 +34,27 @@ def apply_op(op: str, r1: int, imm: int) -> int | None:
         return u64(a * b)
     if op in ("Div64Imm", "Udiv64Imm"):
         return None if b == 0 else a // b
-    if op == "Mod64Imm":
+    if op in ("Mod64Imm", "Urem64Imm"):
         return None if b == 0 else a % b
     if op == "Or64Imm":
         return a | b
     if op == "And64Imm":
         return a & b
+    if op == "Xor64Imm":
+        return a ^ b
+    if op == "Mov64Imm":
+        return b
     if op == "Lsh64Imm":
         return u64(a << b) if b < 64 else 0
     if op == "Rsh64Imm":
         return a >> b if b < 64 else 0
     if op == "Add32Imm":
         r = ((a & MASK32) + (b & MASK32)) & MASK32
+        if r & (1 << 31):
+            return u64(r | ~MASK32)
+        return r
+    if op == "Sub32Imm":
+        r = ((a & MASK32) - (b & MASK32)) & MASK32
         if r & (1 << 31):
             return u64(r | ~MASK32)
         return r
@@ -61,6 +70,17 @@ def apply_op(op: str, r1: int, imm: int) -> int | None:
         if (aa < 0) != (bb < 0):
             q = -q
         return u64(q)
+    if op == "Srem64Imm":
+        if b == 0:
+            return None
+        aa, bb = i64(a), i64(b)
+        if aa == -(1 << 63) and bb == -1:
+            return None
+        # toward-zero remainder: a - trunc(a/b)*b
+        q = abs(aa) // abs(bb)
+        if (aa < 0) != (bb < 0):
+            q = -q
+        return u64(aa - q * bb)
     raise KeyError(f"unsupported op {op}")
 
 

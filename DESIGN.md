@@ -151,6 +151,7 @@ Lean, compare runs against `SbpfVm`.
 | `runFuel` ↔ `Steps` / `Run` adequacy | done (`Adequacy.lean`) |
 | Consumer docs + `docs/SCOPE.md` | done |
 | Stable `Api` (`asm*` + legacy `pf*`) | done |
+| Byte-PC step/run over encodeProgram | done (`ByteStep`) |
 | Universal ∀ encodable → roundTrip proof | optional later |
 | Label resolution / ELF packing | **out of scope** |
 | Full Solana account/CPI / IR compiler | **out of scope** |

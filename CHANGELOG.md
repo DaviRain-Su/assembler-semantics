@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.4 — 2026-07-16
+
+### Byte-PC execution + thicker oracles
+
+- `ByteLayout`: instruction index ↔ byte offset map for a `Program`
+- `ByteStep`: `execStepBytes` / `runFuelBytes` (list step under the hood; PC is byte offset)
+- Samples: list vs byte halt agreement; redecode + byte run
+- `Api.asmStepBytes` / `asmRunBytes`
+- Expanded `tools/diff_oracle` classic + PQR vectors
+
 ## 0.1.3 — 2026-07-16
 
 ### Assembly-layer lock-in + adequacy

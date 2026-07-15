@@ -14,6 +14,8 @@ import SbpfSemantics.WellFormed
 import SbpfSemantics.EncodePreserve
 import SbpfSemantics.SameExec
 import SbpfSemantics.Adequacy
+import SbpfSemantics.ByteLayout
+import SbpfSemantics.ByteStep
 
 /-!
 # SbpfSemantics.Api
@@ -124,5 +126,15 @@ def pfEntryCell (value : Word) (cell : InputCell := counterCell) : Machine :=
   asmEntryCell value cell
 def pfEncodable (i : Instr) : Bool := asmEncodable i
 def pfSameExec (i j : Instr) : Bool := asmSameExec i j
+
+/-! ### Byte-PC view (encoded stream) -/
+
+/-- Step treating `m.pc` as a byte offset into `encodeProgram P`. -/
+def asmStepBytes (D : ExecDialect) (P : Program) (m : Machine) : Option Machine :=
+  execStepBytes D P m
+
+def asmRunBytes (D : ExecDialect) (P : Program) (fuel : Nat := 10_000)
+    (input : Array UInt8 := #[]) (rodata : Array UInt8 := #[]) : Machine × Outcome :=
+  runFuelBytes D P fuel (entryBytes input rodata)
 
 end SbpfSemantics

@@ -8,6 +8,8 @@ import SbpfSemantics.WellFormed
 import SbpfSemantics.EncodePreserve
 import SbpfSemantics.SameExec
 import SbpfSemantics.EncodeSem
+import SbpfSemantics.ByteLayout
+import SbpfSemantics.ByteStep
 import SbpfSemantics.Machine
 import SbpfSemantics.Dialect
 import SbpfSemantics.Host
