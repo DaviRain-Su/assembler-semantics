@@ -54,12 +54,14 @@ theorem execInstr_forExec (D : ExecDialect) (m : Machine) (i : Instr) :
 /-- From Boolean `sameExec`, recover equality of `forExec` projections. -/
 theorem sameExec_forExec_eq (i j : Instr) (h : Instr.sameExec i j = true) :
     Instr.forExec i = Instr.forExec j := by
+  rcases i with ⟨opi, di, si, oi, ii, yi⟩
+  rcases j with ⟨opj, dj, sj, oj, ij, yj⟩
   simp only [Instr.sameExec, Bool.and_eq_true, beq_iff_eq] at h
   obtain ⟨hop, hrest⟩ := h
-  -- Rewrite j.opcode → i.opcode via hop, then case on class.
-  simp only [Instr.forExec, hop]
-  cases i.opcode.opClass <;>
-    simp_all [Bool.and_eq_true, beq_iff_eq]
+  cases hop
+  -- opi = opj
+  simp only [Instr.forExec, Opcode.opClass] at hrest ⊢
+  cases opi <;> simp_all [beq_iff_eq, Bool.and_eq_true]
 
 /-- **Main theorem:** execution-relevant equality implies equal `execInstr`. -/
 theorem sameExec_execInstr (D : ExecDialect) (m : Machine) (i j : Instr)
@@ -89,13 +91,5 @@ theorem roundTripSameExec_execInstr (D : ExecDialect) (m : Machine) (i : Instr)
   | some j =>
       simp only [hde] at h
       exact sameExec_execInstr D m i j h
-
-/-- Concrete corollary used by encode suite. -/
-theorem samples_roundTrip_implies_exec (i : Instr) (m : Machine)
-    (_hin : i ∈ encodePreserveSamples) (hrt : roundTripSameExec i = true) :
-    match decodeEncode? i with
-    | none => True
-    | some j => execInstr closedExec m i = execInstr closedExec m j :=
-  roundTripSameExec_execInstr closedExec m i hrt
 
 end SbpfSemantics
