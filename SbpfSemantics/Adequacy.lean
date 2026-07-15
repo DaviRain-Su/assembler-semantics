@@ -179,4 +179,113 @@ theorem runObserved_outcome_of_Run (D : ExecDialect) (P : Program) (m mfin : Mac
   refine ⟨fuel, ?_⟩
   simp [runObserved, hr, observe]
 
+/-! ### Non-halt outcomes -/
+
+/-- Out-of-fuel: zero fuel and not halted. -/
+theorem runFuel_outOfFuel_zero (D : ExecDialect) (P : Program) (m : Machine)
+    (h : m.halted = none) :
+    runFuel D P 0 m = (m, .outOfFuel) := by
+  simp [runFuel, h]
+
+/-- Stuck immediately: `execStep` fails while not halted. -/
+theorem runFuel_stuck_of_step_none (D : ExecDialect) (P : Program) (fuel : Nat) (m : Machine)
+    (hnh : m.halted = none) (hs : execStep D P m = none) :
+    runFuel D P (fuel + 1) m = (m, .stuck) := by
+  simp [runFuel, hnh, hs]
+
+/-- Direct stuck case inversion (failed first step). -/
+theorem runFuel_stuck_of_first_step (D : ExecDialect) (P : Program) (fuel : Nat)
+    (m m' : Machine)
+    (hnh : m.halted = none) (hs : execStep D P m = none)
+    (h : runFuel D P (fuel + 1) m = (m', .stuck)) :
+    m' = m := by
+  have h' : runFuel D P (fuel + 1) m = (m, .stuck) := by
+    simp [runFuel, hnh, hs]
+  -- h' / h equate pairs; first projections give `m = m'`
+  have := congrArg Prod.fst (h'.symm.trans h)
+  -- `this : m = m'`; goal is `m' = m`
+  exact this.symm
+
+/-- Stuck outcome keeps the pre-step machine. -/
+theorem runFuel_stuck_machine (D : ExecDialect) (P : Program) (fuel : Nat) (m m' : Machine)
+    (hnh : m.halted = none) (hs : execStep D P m = none)
+    (h : runFuel D P (fuel + 1) m = (m', .stuck)) :
+    m' = m ∧ runFuel D P (fuel + 1) m = (m, .stuck) :=
+  ⟨runFuel_stuck_of_first_step D P fuel m m' hnh hs h,
+    runFuel_stuck_of_step_none D P fuel m hnh hs⟩
+
+/-- Exact `n` successful steps, not halted, fuel exactly `n` ⇒ out of fuel. -/
+theorem steps_runFuel_outOfFuel (D : ExecDialect) (P : Program) :
+    ∀ n m mfin,
+      Steps D P n m mfin →
+      mfin.halted = none →
+      runFuel D P n m = (mfin, .outOfFuel) := by
+  intro n m mfin hs
+  induction hs with
+  | zero m0 =>
+      intro hnh
+      simp [runFuel, hnh]
+  | succ hstep hrest ih =>
+      intro hnh
+      have hnh0 := Step_not_halted hstep
+      simp only [runFuel, hnh0, show execStep D P _ = some _ from hstep]
+      exact ih hnh
+
+/-- If `runFuel` reports out-of-fuel, the final machine is not halted. -/
+theorem runFuel_outOfFuel_not_halted (D : ExecDialect) (P : Program) :
+    ∀ fuel m mfin,
+      runFuel D P fuel m = (mfin, .outOfFuel) →
+      mfin.halted = none := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro m mfin h
+      simp only [runFuel] at h
+      cases hm : m.halted with
+      | some _ => simp [hm] at h
+      | none =>
+          simp [hm] at h
+          -- h : m = mfin ∧ True  or  (m, oof) = (mfin, oof)
+          cases h
+          exact hm
+  | succ fuel ih =>
+      intro m mfin h
+      simp only [runFuel] at h
+      cases hm : m.halted with
+      | some _ => simp [hm] at h
+      | none =>
+          cases hs : execStep D P m with
+          | none => simp [hm, hs] at h
+          | some m1 =>
+              simp only [hm, hs] at h
+              exact ih m1 mfin h
+
+/-- If `runFuel` reports stuck, the final machine is not halted. -/
+theorem runFuel_stuck_not_halted (D : ExecDialect) (P : Program) :
+    ∀ fuel m mfin,
+      runFuel D P fuel m = (mfin, .stuck) →
+      mfin.halted = none := by
+  intro fuel
+  induction fuel with
+  | zero =>
+      intro m mfin h
+      simp only [runFuel] at h
+      cases hm : m.halted with
+      | some _ => simp [hm] at h
+      | none => simp [hm] at h
+  | succ fuel ih =>
+      intro m mfin h
+      simp only [runFuel] at h
+      cases hm : m.halted with
+      | some _ => simp [hm] at h
+      | none =>
+          cases hs : execStep D P m with
+          | none =>
+              simp [hm, hs] at h
+              cases h
+              exact hm
+          | some m1 =>
+              simp only [hm, hs] at h
+              exact ih m1 mfin h
+
 end SbpfSemantics

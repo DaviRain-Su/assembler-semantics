@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.5 — 2026-07-16
+
+### P0–P2 priority package (round-trip, bisim, size, adequacy, freeze)
+
+- **P0 RoundTrip:** V3-safe opcode witness table (`all_v3_safe_opcodes_have_roundtrip_witness`),
+  binImm/ja/lddw batteries, constructor samples; still not a full `∀ encodable → roundTrip` proof
+- **P0 ByteBisim:** fuel-bounded list↔byte lockstep suite + outcome agreement; `machine_with_pc_id`
+- **P0 divergences:** expanded `vectors.json` (classic/pqr/programs/divergences) + `docs/divergences.md`
+- **P1 EncodeSize:** theorems `encodeInstr_size`, `encodeProgram_size` (length = `sizeBytes` / `totalBytes`)
+- **P1 Adequacy non-halt:** `steps_runFuel_outOfFuel`, stuck/outOfFuel not-halted, first-step stuck inversion
+- **P2:** CounterScenario fuel tuned for faster `native_decide`; `Corpus` module; `docs/API_FREEZE.md`;
+  Api exports `asmEncode_size` / `asmV3SafeRoundTripWitnesses`
+
 ## 0.1.4 — 2026-07-16
 
 ### Byte-PC execution + thicker oracles

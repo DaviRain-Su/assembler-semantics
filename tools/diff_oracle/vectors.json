@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "note": "Classic ALU goldens mirrored from sbpf crates/common execute tests and DiffTests.lean. PQR vectors follow SIMD-0174.",
+  "note": "Classic ALU goldens mirrored from sbpf crates/common execute tests and DiffTests.lean. PQR vectors follow SIMD-0174. See docs/divergences.md for intentional differences.",
   "classic": [
     {"op": "Add64Imm", "r1_in": 5, "imm": 10, "r1_out": 15},
     {"op": "Sub64Imm", "r1_in": 10, "imm": 3, "r1_out": 7},
@@ -12,10 +12,14 @@
     {"op": "Xor64Imm", "r1_in": 255, "imm": 15, "r1_out": 240},
     {"op": "Lsh64Imm", "r1_in": 1, "imm": 4, "r1_out": 16},
     {"op": "Rsh64Imm", "r1_in": 240, "imm": 4, "r1_out": 15},
+    {"op": "Arsh64Imm", "r1_in": -16, "imm": 2, "r1_out": -4},
     {"op": "Mod64Imm", "r1_in": 15, "imm": 7, "r1_out": 1},
     {"op": "Mov64Imm", "r1_in": 99, "imm": 42, "r1_out": 42},
     {"op": "Add32Imm", "r1_in": 5, "imm": 10, "r1_out": 15},
-    {"op": "Sub32Imm", "r1_in": 10, "imm": 3, "r1_out": 7}
+    {"op": "Sub32Imm", "r1_in": 10, "imm": 3, "r1_out": 7},
+    {"op": "Mul32Imm", "r1_in": 6, "imm": 5, "r1_out": 30},
+    {"op": "Neg64", "r1_in": 5, "imm": 0, "r1_out": -5, "note": "unary; imm unused"},
+    {"op": "Neg32", "r1_in": 5, "imm": 0, "r1_out": 4294967291, "note": "unary: i32 neg then zero-extend (sbpf)"}
   ],
   "pqr": [
     {"op": "Lmul64Imm", "r1_in": 6, "imm": 5, "r1_out": 30},
@@ -23,7 +27,9 @@
     {"op": "Urem64Imm", "r1_in": 20, "imm": 6, "r1_out": 2},
     {"op": "Uhmul64Imm", "r1_in": 4294967296, "imm": 4294967296, "r1_out": 1},
     {"op": "Sdiv64Imm", "r1_in": -10, "imm": 3, "r1_out": -3},
-    {"op": "Srem64Imm", "r1_in": -10, "imm": 3, "r1_out": -1}
+    {"op": "Srem64Imm", "r1_in": -10, "imm": 3, "r1_out": -1},
+    {"op": "Lmul32Imm", "r1_in": 6, "imm": 5, "r1_out": 30},
+    {"op": "Udiv32Imm", "r1_in": 20, "imm": 5, "r1_out": 4}
   ],
   "programs": [
     {
@@ -35,6 +41,42 @@
       "name": "jeq_skip",
       "halt": 0,
       "note": "mov64 r0,0; jeq r0,0,+1; add64 r0,1; exit"
+    },
+    {
+      "name": "lddw_add_exit",
+      "halt": 257,
+      "note": "lddw r0,0x100; add64 r0,1; exit"
+    },
+    {
+      "name": "call_rel_exit",
+      "halt": 7,
+      "note": "call +1; exit; mov64 r0,7; exit"
+    }
+  ],
+  "divergences": [
+    {
+      "topic": "classic_pqr_bytes",
+      "lean": "encodable=false under V3",
+      "sbpf_execute": "often InvalidInstruction",
+      "diff_safe": false
+    },
+    {
+      "topic": "pqr_simd0174",
+      "lean": "implemented",
+      "sbpf_execute": "largely unimplemented",
+      "diff_safe": false
+    },
+    {
+      "topic": "mov32_reg",
+      "lean": "sign-extend low 32 (V3 note)",
+      "sbpf_execute": "zero-extend classic path",
+      "diff_safe": false
+    },
+    {
+      "topic": "classic_alu64",
+      "lean": "implemented",
+      "sbpf_execute": "implemented",
+      "diff_safe": true
     }
   ]
 }

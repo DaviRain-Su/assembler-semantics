@@ -16,6 +16,9 @@ import SbpfSemantics.SameExec
 import SbpfSemantics.Adequacy
 import SbpfSemantics.ByteLayout
 import SbpfSemantics.ByteStep
+import SbpfSemantics.ByteBisim
+import SbpfSemantics.EncodeSize
+import SbpfSemantics.RoundTrip
 
 /-!
 # SbpfSemantics.Api
@@ -90,6 +93,19 @@ def asmSameExec (i j : Instr) : Bool :=
 
 def asmRoundTrip (i : Instr) : Bool :=
   roundTripSameExec i
+
+/-- Encode length equals `sizeBytes` (theorem `encodeInstr_size`). -/
+theorem asmEncodeInstr_size (i : Instr) : (asmEncodeInstr i).size = i.sizeBytes :=
+  encodeInstr_size i
+
+/-- Whole-program encode length equals layout `totalBytes`. -/
+theorem asmEncode_size (P : Program) : (asmEncode P).size = P.totalBytes :=
+  encodeProgram_size P
+
+/-- Every V3-safe opcode has a round-tripping witness (see `RoundTrip`). -/
+theorem asmV3SafeRoundTripWitnesses :
+    allV3SafeWitnessRoundTrip = true :=
+  all_v3_safe_opcodes_have_roundtrip_witness
 
 /-! ### Machine helpers -/
 

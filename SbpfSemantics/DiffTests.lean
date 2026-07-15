@@ -57,8 +57,23 @@ example : stepR1 .Rsh64Imm 4#64 0xf0#64 = some 0x0f#64 := by native_decide
 /-- From sbpf `test_mod64_imm`: r1=15, mod64 7 → 1. -/
 example : stepR1 .Mod64Imm 7#64 15#64 = some 1#64 := by native_decide
 
+/-- Arithmetic shift: -16 >>> 2 → -4. -/
+example :
+    stepR1 .Arsh64Imm 2#64 (BitVec.ofInt 64 (-16)) = some (BitVec.ofInt 64 (-4)) := by
+  native_decide
+
 /-- From sbpf `test_add32_imm`: r1=5, add32 10 → 15. -/
 example : stepR1 .Add32Imm 10#64 5#64 = some 15#64 := by native_decide
+
+/-- mul32 imm sign-extends. -/
+example : stepR1 .Mul32Imm 5#64 6#64 = some 30#64 := by native_decide
+
+/-- Unary neg64. -/
+example :
+    let m0 := (Machine.entry).setReg r1 5#64
+    (execInstr closedExec m0 (.unary .Neg64 r1)).map (·.getReg r1) =
+      some (BitVec.ofInt 64 (-5)) := by
+  native_decide
 
 /-- PQR: lmul64 same as low 64 of product. -/
 example : stepR1 .Lmul64Imm 5#64 6#64 = some 30#64 := by native_decide
@@ -83,6 +98,18 @@ def progTrace : Program :=
   ]
 
 example : (interpEntry closedExec progTrace 10).2 = .halted 15#64 := by native_decide
+
+/-- lddw + add (byte-wide insn). -/
+def progLddw : Program :=
+  #[.lddw r0 0x100#64, .binImm .Add64Imm r0 1#64, .exit]
+
+example : (interpEntry closedExec progLddw 10).2 = .halted 0x101#64 := by native_decide
+
+/-- Internal call + exit. -/
+def progCall : Program :=
+  #[.callRel 1#64, .exit, .binImm .Mov64Imm r0 7#64, .exit]
+
+example : (interpEntry closedExec progCall 20).2 = .halted 7#64 := by native_decide
 
 /-- Syscall stub: log then exit with r0 unchanged except syscall return 0. -/
 def progLog : Program :=

@@ -43,11 +43,16 @@ No Mathlib dependency for the core skeleton (faster cold builds).
 | `Dialect` / `Host` | Syscall hosts (`closed` / `noop` / `stub` / `host`) |
 | `Step` | Single-step exec + relational `Step` |
 | `Run` / `Interp` | Fuel multi-step runner |
-| `Determinism` / `Adequacy` | Meta-theory (core lemmas) |
+| `Determinism` / `Adequacy` | Meta-theory (halt + non-halt adequacy) |
+| `EncodeSize` / `RoundTrip` / `ByteBisim` | encode length, V3 witnesses, list↔byte PC |
+| `Corpus` | hand-written L2 regression programs |
 | `Examples` / `DiffTests` | `native_decide` goldens vs sbpf traces |
 
 See also:
 
+- [`docs/SCOPE.md`](./docs/SCOPE.md) — locked assembly-layer scope
+- [`docs/API_FREEZE.md`](./docs/API_FREEZE.md) — stable `asm*` surface
+- [`docs/divergences.md`](./docs/divergences.md) — Lean vs sbpf / solanalib diffs
 - [`docs/for-proof-forge-consumers.md`](./docs/for-proof-forge-consumers.md) — **what PF needs / how Lean 拼汇编 fits**
 - [`docs/proof-forge-interface.md`](./docs/proof-forge-interface.md) — stable API surface
 - [`docs/diff-oracle.md`](./docs/diff-oracle.md) and [`tools/diff_oracle/`](./tools/diff_oracle/)

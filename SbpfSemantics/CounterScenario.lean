@@ -70,15 +70,15 @@ def progInit (v : Word) : Program :=
   #[.binImm .Mov64Imm r0 v] ++ storeCount ++ #[.exit]
 
 /-- Run get on initial count `c`. -/
-def runGet (c : Word) (fuel : Nat := 128) : Observation :=
+def runGet (c : Word) (fuel : Nat := 48) : Observation :=
   runObserved pfDefaultHost progGet fuel (Machine.entryWithCell counterCell c)
 
 /-- Run increment-by-`d` starting from count `c`. -/
-def runInc (c d : Word) (fuel : Nat := 256) : Observation :=
+def runInc (c d : Word) (fuel : Nat := 64) : Observation :=
   runObserved pfDefaultHost (progIncrement d) fuel (Machine.entryWithCell counterCell c)
 
 /-- Sequential init → get on the same memory (new invocation via `readyForNext`). -/
-def runInitThenGet (v : Word) (fuel : Nat := 256) : Observation × Observation :=
+def runInitThenGet (v : Word) (fuel : Nat := 64) : Observation × Observation :=
   let m0 := Machine.entryWithCell counterCell 0#64
   let (m1, o1) := runFuel pfDefaultHost (progInit v) fuel m0
   let obs1 := observe m1 o1
@@ -86,7 +86,7 @@ def runInitThenGet (v : Word) (fuel : Nat := 256) : Observation × Observation :
   (obs1, obs2)
 
 /-- Sequential init → inc → get (each entrypoint is a fresh invocation). -/
-def runInitIncGet (v d : Word) (fuel : Nat := 512) : Observation × Observation × Observation :=
+def runInitIncGet (v d : Word) (fuel : Nat := 96) : Observation × Observation × Observation :=
   let m0 := Machine.entryWithCell counterCell 0#64
   let (m1, o1) := runFuel pfDefaultHost (progInit v) fuel m0
   let (m2, o2) := runFuel pfDefaultHost (progIncrement d) fuel m1.readyForNext
@@ -121,7 +121,7 @@ example :
 example :
     (pfDecode? (pfEncode progGet)).map
         (fun P' =>
-          (runObserved pfDefaultHost P' 128 (Machine.entryWithCell counterCell 3#64)).r0)
+          (runObserved pfDefaultHost P' 48 (Machine.entryWithCell counterCell 3#64)).r0)
       = some 3#64 := by
   native_decide
 

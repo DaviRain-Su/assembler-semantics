@@ -24,6 +24,13 @@ def i64(x: int) -> int:
     return x - (1 << 64) if x >= (1 << 63) else x
 
 
+def sext32(r: int) -> int:
+    r &= MASK32
+    if r & (1 << 31):
+        return u64(r | ~MASK32)
+    return r
+
+
 def apply_op(op: str, r1: int, imm: int) -> int | None:
     a, b = u64(r1), u64(imm)
     if op == "Add64Imm":
@@ -48,16 +55,25 @@ def apply_op(op: str, r1: int, imm: int) -> int | None:
         return u64(a << b) if b < 64 else 0
     if op == "Rsh64Imm":
         return a >> b if b < 64 else 0
+    if op == "Arsh64Imm":
+        sh = b if b < 64 else 63
+        return u64(i64(a) >> sh)
+    if op == "Neg64":
+        return u64(-a)
+    if op == "Neg32":
+        # zero-extend of i32 negation bit pattern (sbpf)
+        return u64((- (a & MASK32)) & MASK32)
     if op == "Add32Imm":
-        r = ((a & MASK32) + (b & MASK32)) & MASK32
-        if r & (1 << 31):
-            return u64(r | ~MASK32)
-        return r
+        return sext32((a & MASK32) + (b & MASK32))
     if op == "Sub32Imm":
-        r = ((a & MASK32) - (b & MASK32)) & MASK32
-        if r & (1 << 31):
-            return u64(r | ~MASK32)
-        return r
+        return sext32((a & MASK32) - (b & MASK32))
+    if op == "Mul32Imm":
+        return sext32((a & MASK32) * (b & MASK32))
+    if op == "Lmul32Imm":
+        return (a & MASK32) * (b & MASK32) & MASK32
+    if op == "Udiv32Imm":
+        aa, bb = a & MASK32, b & MASK32
+        return None if bb == 0 else aa // bb
     if op == "Uhmul64Imm":
         return (a * b) >> 64
     if op == "Sdiv64Imm":

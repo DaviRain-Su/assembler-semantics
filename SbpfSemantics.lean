@@ -10,6 +10,9 @@ import SbpfSemantics.SameExec
 import SbpfSemantics.EncodeSem
 import SbpfSemantics.ByteLayout
 import SbpfSemantics.ByteStep
+import SbpfSemantics.ByteBisim
+import SbpfSemantics.EncodeSize
+import SbpfSemantics.RoundTrip
 import SbpfSemantics.Machine
 import SbpfSemantics.Dialect
 import SbpfSemantics.Host
@@ -27,4 +30,5 @@ import SbpfSemantics.Examples
 import SbpfSemantics.DiffTests
 import SbpfSemantics.BridgeSketch
 import SbpfSemantics.CounterScenario
+import SbpfSemantics.Corpus
 -- Api already pulls Adequacy / SameExec; keep library root complete.
