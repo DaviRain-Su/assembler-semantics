@@ -26,6 +26,8 @@ import SbpfSemantics.Observation
 import SbpfSemantics.AccountLayout
 import SbpfSemantics.Coverage
 import SbpfSemantics.Api
+import SbpfSemantics.Sha256
+import SbpfSemantics.Syscalls
 import SbpfSemantics.Examples
 import SbpfSemantics.DiffTests
 import SbpfSemantics.BridgeSketch

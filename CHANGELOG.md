@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.7 — 2026-07-17
+
+### Syscalls: PDA / log over an in-core SHA-256
+
+- `Sha256.lean`: self-contained pure FIPS 180-4 SHA-256 over `Array UInt8`
+  (FIPS test vectors kernel-checked by `native_decide`)
+- `Syscalls.lean` (new): agave-ABI host syscalls on `Machine` —
+  `sol_create_program_address`, `sol_try_find_program_address` (bump search
+  from 255; curve check **not** modeled — documented abstraction),
+  `sol_log_data` stub
+- `richSyscallFn` / `richDialect` / `richExec`: the old `hostSyscallFn`
+  surface plus the new table; `richStep` for stepping
+- `invokeExec`: user-injectable `sol_invoke_signed_c` hook;
+  **fail-closed by default** (not in the rich table)
+- End-to-end goldens: `createAddressGolden`, `tryFindGolden` (digest equality
+  with the pure library across the syscall boundary, bump byte at `bump_out`)
+- Root import: `SbpfSemantics.Sha256`, `SbpfSemantics.Syscalls`
+
 ## 0.1.6 — 2026-07-16
 
 ### Layout formalization + roadmap
